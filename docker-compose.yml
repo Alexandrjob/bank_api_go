@@ -1,0 +1,64 @@
+name: bank_api_go
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    networks:
+      - bank_api-net
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: bank_api_go:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bank_api
+    networks:
+      - bank_api-net
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  migrations:
+    image: bank_api_go:latest
+    container_name: migration_postgres_bank_api
+    networks:
+      - bank_api-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    command: sh -c "goose -dir src/migrations postgres 'host=$POSTGRES_HOST user=$POSTGRES_USER 
+      password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB port=$POSTGRES_PORT sslmode=disable' up"
+
+networks:
+  bank_api-net:
+
+volumes:
+  postgres_data:

@@ -1,0 +1,105 @@
+definitions:
+  entities.Operation:
+    properties:
+      dateCreate:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      scope:
+        type: number
+      userId:
+        type: integer
+    type: object
+  entities.User:
+    properties:
+      balance:
+        type: number
+      id:
+        type: integer
+      operations:
+        items:
+          $ref: '#/definitions/entities.Operation'
+        type: array
+    type: object
+  models.TransferInfo:
+    properties:
+      recipientId:
+        type: integer
+      scope:
+        type: number
+      senderId:
+        type: integer
+    type: object
+  models.UpdateInfo:
+    properties:
+      operation:
+        $ref: '#/definitions/entities.Operation'
+      user:
+        $ref: '#/definitions/entities.User'
+    type: object
+info:
+  contact: {}
+paths:
+  /bank_account/{id}/operations:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Operation'
+            type: array
+      summary: Получение 10 последних операций пользователя
+      tags:
+      - bank_account
+  /bank_account/transfer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные перевода денежных средств
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TransferInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Перевод денежных средств другому пользователю
+      tags:
+      - bank_account
+  /bank_account/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные пополнения баланса
+        in: body
+        name: transfer
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Пополнение баланса пользователя
+      tags:
+      - bank_account
+swagger: "2.0"

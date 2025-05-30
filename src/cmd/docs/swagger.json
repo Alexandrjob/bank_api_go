@@ -1,0 +1,166 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/bank_account/transfer": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Перевод денежных средств другому пользователю",
+                "parameters": [
+                    {
+                        "description": "Данные перевода денежных средств",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.TransferInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/bank_account/update": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Пополнение баланса пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные пополнения баланса",
+                        "name": "transfer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/bank_account/{id}/operations": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Получение 10 последних операций пользователя",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Operation"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.Operation": {
+            "type": "object",
+            "properties": {
+                "dateCreate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "number"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.User": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "operations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Operation"
+                    }
+                }
+            }
+        },
+        "models.TransferInfo": {
+            "type": "object",
+            "properties": {
+                "recipientId": {
+                    "type": "integer"
+                },
+                "scope": {
+                    "type": "number"
+                },
+                "senderId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.UpdateInfo": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "$ref": "#/definitions/entities.Operation"
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                }
+            }
+        }
+    }
+}
